@@ -3,6 +3,13 @@
 Each version is split into **New features**, **Fixes** and **Optimizations**.
 Shown in Settings › Updates. The Spanish file (CHANGELOG.md) is the reference.
 
+## 1.2.10 beta — 2026-11-09
+
+### Fixes
+- If the saved video wallpaper is deleted or missing, the island goes back to the static wallpaper instead of staying grey and locked.
+- Choosing a photo or "No wallpaper" always turns the video off.
+- If the video player doesn't close when asked, the island ends it so changing wallpapers doesn't stay stuck.
+
 ## 1.2.9 beta — 2026-11-09
 
 ### Fixes

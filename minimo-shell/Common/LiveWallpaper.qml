@@ -12,6 +12,9 @@ import "livewall.js" as LW
 //   · cuando todos los monitores muestran un escritorio con ventanas (si la opción está activa),
 //   · cuando nadie usa la PC (inactividad).
 // Las ventanas se re-evalúan solo con eventos de Hyprland (sin sondeo) y solo con el fondo activo.
+// Si el archivo guardado no existe (al iniciar o al elegirlo), se limpia liveWallpaper y
+// vuelve el fondo estático. Tras pedir stop, un watchdog de 2 s (una sola vez) manda
+// SIGTERM y luego SIGKILL si el proceso no termina, para liberar stopping.
 Singleton {
     id: root
     property bool available: false
@@ -29,9 +32,29 @@ Singleton {
     // Ahora el ciclo lo decide Common/livewall.js (nunca dos procesos; reinicio tras exited).
     property var lw: LW.initial()
     readonly property string wanted: active ? DisplayState.liveWallpaper : ""
+    property string checking: ""
+    property int checkGen: 0
     onWantedChanged: sync()
     function sync() {
-        const r = LW.want(lw, wanted, Date.now())
+        const path = wanted
+        if (path !== "") {
+            if (lw.running && lw.current === path && !lw.stopping) return
+            root.checkGen++
+            root.checking = path
+            existsCheck.running = false
+            // test no acepta -- (sale 2 aunque el archivo exista). Las rutas son absolutas.
+            existsCheck.command = ["test", "-f", path]
+            existsCheck.gen = root.checkGen
+            existsCheck.running = true
+            return
+        }
+        root.checkGen++
+        root.checking = ""
+        existsCheck.running = false
+        applyWant("")
+    }
+    function applyWant(path) {
+        const r = LW.want(lw, path, Date.now())
         lw = r.state
         if (r.act === "start") {
             // Borra un socket viejo (de un mpvpaper que murió) y \`exec\`: el PID es el de mpvpaper,
@@ -39,13 +62,46 @@ Singleton {
             player.command = ["sh", "-c", 'rm -f "$1"; shift; exec mpvpaper "$@"', "mpvwall", root.sock,
                               "-o", "no-audio loop-file=inf hwdec=auto panscan=1.0 input-ipc-server=" + root.sock, "*", lw.current]
             player.running = true
-        } else if (r.act === "stop") player.running = false
+            stopWatch.stop()
+            killWatch.stop()
+        } else if (r.act === "stop") {
+            player.running = false
+            stopWatch.restart()
+        }
+    }
+    Process {
+        id: existsCheck
+        property int gen: 0
+        onExited: code => {
+            if (gen !== root.checkGen) return
+            const path = root.checking
+            root.checking = ""
+            if (path === "" || root.wanted !== path) { Qt.callLater(root.sync); return }
+            // 1 = no existe; otro no-cero (p. ej. uso inválido de test) no debe impedir el arranque.
+            if (code === 1) {
+                if (DisplayState.liveWallpaper !== "") DisplayState.setLiveWallpaper("")
+                return
+            }
+            root.applyWant(path)
+        }
     }
     Process {
         id: player
         onRunningChanged: if (running) sendLater.restart()
-        onExited: { root.lw = LW.exited(root.lw, Date.now()); Qt.callLater(root.sync) }
+        onExited: {
+            stopWatch.stop()
+            killWatch.stop()
+            root.lw = LW.exited(root.lw, Date.now())
+            Qt.callLater(root.sync)
+        }
     }
+    // Solo corre después de un stop: 2 s, si sigue vivo SIGTERM; 400 ms después, SIGKILL.
+    Timer { id: stopWatch; interval: 2000; repeat: false; onTriggered: {
+        if (!player.running) return
+        player.signal(15)
+        killWatch.restart()
+    } }
+    Timer { id: killWatch; interval: 400; repeat: false; onTriggered: { if (player.running) player.signal(9) } }
 
     onPausedChanged: send()
     // El socket aparece un instante después de arrancar mpv.

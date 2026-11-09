@@ -7,6 +7,8 @@
 //     recién cuando el anterior terminó (exited).
 //   · Si un proceso muere solo en menos de 2 s (archivo inválido, falta GPU…) no se reintenta
 //     ese archivo hasta que se elija otro (evita un bucle de reinicios).
+//   · stopping se libera solo en exited(): si el proceso no termina, el QML manda SIGTERM/SIGKILL
+//     para que onExited corra y se pueda aplicar el wanted pendiente (incluido "").
 
 function initial() { return { current: "", running: false, stopping: false, startedAt: 0, failed: "" } }
 

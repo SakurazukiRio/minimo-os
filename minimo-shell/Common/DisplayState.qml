@@ -42,6 +42,7 @@ Singleton {
     function setWallpaper(path) {
         wallpaper = path
         if (path !== "") wallpaperHistory = [path].concat(wallpaperHistory.filter(p => p !== path)).slice(0, 24)
+        if (liveWallpaper !== "") liveWallpaper = ""
         save()
     }
     // Quitar un fondo de la lista (y dejar de usarlo si era el actual).

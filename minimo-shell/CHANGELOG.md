@@ -4,6 +4,13 @@ Cada versión se divide en **Nuevas funciones**, **Correcciones** y **Optimizaci
 Ajustes › Actualizaciones muestra este archivo (y CHANGELOG.en.md en inglés). Al publicar una versión: renombrar
 «Próxima versión» con el número y la fecha, subir `minimo-shell/VERSION` y crear la etiqueta `vX.Y.Z`.
 
+## 1.2.10 beta — 2026-11-09
+
+### Correcciones
+- Si se borra o falta el video usado como fondo animado, la isla vuelve al fondo estático en lugar de quedar en gris y sin poder cambiarlo.
+- Elegir una foto o «Sin fondo» apaga siempre el fondo animado.
+- Si el reproductor del fondo animado no termina al pedirlo, la isla lo cierra para que se pueda cambiar el fondo.
+
 ## 1.2.9 beta — 2026-11-09
 
 ### Correcciones

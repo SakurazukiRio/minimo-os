@@ -33,6 +33,12 @@ PanelWindow {
     onPathChanged: if (visible) show(path)
     onVisibleChanged: { if (!visible) { imgA.source = ""; imgB.source = "" } else if (path) show(path) }
     Component.onCompleted: if (path) show(path)
+    // Si el fondo animado se apaga después de cargar el estado, o el path llegó antes de loaded,
+    // vuelve a mostrar la imagen estática.
+    Connections {
+        target: DisplayState
+        function onLoadedChanged() { if (DisplayState.loaded && win.visible && win.path) win.show(win.path) }
+    }
 
     component Layer: Image {
         anchors.fill: parent
