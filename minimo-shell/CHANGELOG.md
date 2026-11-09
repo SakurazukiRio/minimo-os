@@ -4,6 +4,12 @@ Cada versión se divide en **Nuevas funciones**, **Correcciones** y **Optimizaci
 Ajustes › Actualizaciones muestra este archivo (y CHANGELOG.en.md en inglés). Al publicar una versión: renombrar
 «Próxima versión» con el número y la fecha, subir `minimo-shell/VERSION` y crear la etiqueta `vX.Y.Z`.
 
+## 1.2.9 beta — 2026-11-09
+
+### Correcciones
+- El scroll en la isla ya no deja de cambiar de escritorio después de encender la PC: el tiempo entre scrolls se mide con un reloj monotónico, inmune a la corrección de hora del arranque.
+- El cambio de escritorio por clic y scroll ejecuta hyprctl de forma fiable con Quickshell 0.3.2.
+
 ## 1.2.8 beta — 2026-11-05
 
 ### Correcciones

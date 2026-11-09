@@ -3,6 +3,12 @@
 Each version is split into **New features**, **Fixes** and **Optimizations**.
 Shown in Settings › Updates. The Spanish file (CHANGELOG.md) is the reference.
 
+## 1.2.9 beta — 2026-11-09
+
+### Fixes
+- Island scrolling no longer stops switching desktops after powering on the PC: the time between scrolls is measured with a monotonic clock, immune to the boot-time clock correction.
+- Desktop switching by click and scroll runs hyprctl reliably with Quickshell 0.3.2.
+
 ## 1.2.8 beta — 2026-11-05
 
 ### Fixes
